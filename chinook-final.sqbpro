@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/Oduro/AppData/Local/Temp/Temp1_chinook-db.zip/chinook_db/chinook.db" readonly="1" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="3954"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,5:mainAlbum"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Album" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="61"/><column index="2" value="300"/><column index="3" value="59"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">--Which countries have the most Invoices?
+
+SELECT BillingCountry,
+       COUNT(i.InvoiceID) Number_Invoices
+FROM Invoice i
+GROUP BY BillingCountry
+ORDER BY Number_Invoices DESC;
+
+--Which city has the best customers?
+
+SELECT BillingCity,
+       SUM(i.Total) Invoice_Total
+FROM Invoice i
+GROUP BY BillingCity
+ORDER BY Invoice_Total DESC
+LIMIT 1;
+
+--Who is the best customer?
+
+SELECT FirstName,
+       LastName,
+       c.CustomerId,
+       SUM(Total) Total_Spent
+FROM Customer c
+JOIN Invoice i ON c.CustomerId =i.CustomerId
+GROUP BY c.CustomerId
+ORDER BY Total_Spent DESC
+LIMIT 10;
+
+--Write a query to return the email, firstname, lastname, and genre of all Rock Music listeners
+
+SELECT DISTINCT c.Email Email,
+                c.FirstName FirstName,
+                c.LastName LastName,
+                g.Name Name
+FROM Customer c
+JOIN Invoice i ON c.CustomerId = i.CustomerId
+JOIN InvoiceLine ON i.InvoiceId = InvoiceLine.InvoiceId
+JOIN Track t ON InvoiceLine.TrackId = t.TrackId
+JOIN Genre g ON t.GenreId = g.GenreId
+WHERE g.Name LIKE 'Rock'
+ORDER BY Email;
+
+--Who is writing the rock music?
+
+SELECT a.ArtistId Artist_Id,
+       a.Name Artist_Name,
+       COUNT(t.Name) Songs
+FROM Artist a
+JOIN Album al ON al.ArtistId = a.ArtistId
+JOIN Track t ON al.AlbumId = t.AlbumId
+JOIN Genre g ON t.GenreId = g.GenreId
+WHERE g.Name = 'Rock'
+GROUP BY a.ArtistId
+ORDER BY Songs DESC
+LIMIT 10;
+
+--Which artist has earned the most according to the InvoiceLines?
+
+SELECT c.CustomerId CustomerId,
+       a.Name Name,
+       c.FirstName First_Name,
+       c.LastName Last_Name,
+       SUM(il.UnitPrice * il.Quantity) Amount_Spent
+FROM Customer c
+JOIN Invoice i ON c.CustomerId = i.CustomerId
+JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId
+JOIN Track t ON il.TrackId = t.TrackId
+JOIN Album al ON t.AlbumId = al.AlbumId
+JOIN Artist a ON al.ArtistId = a.ArtistId
+WHERE a.Name LIKE 'Iron Maiden'
+GROUP BY c.CustomerId
+ORDER BY Amount_Spent DESC;
+
+--What songs have a longer song length than the average song length?
+
+SELECT DISTINCT Title,
+                Name,
+                Milliseconds
+FROM Track t
+JOIN Album al ON t.AlbumId = al.AlbumId
+WHERE Milliseconds &gt;
+    (SELECT AVG(Milliseconds) Avg_Length
+     FROM Track)
+ORDER BY 3 DESC
+LIMIT 50;
+
+--Additional questions
+--What album has the most millisecods?
+
+SELECT DISTINCT Title,
+                Name,
+                Milliseconds
+FROM Track t
+JOIN Album al ON t.AlbumId = al.AlbumId
+WHERE Milliseconds &gt;
+    (SELECT AVG(Milliseconds) Avg_Length
+     FROM Track)
+ORDER BY 3 DESC
+LIMIT 50;</sql><current_tab id="0"/></tab_sql></sqlb_project>
